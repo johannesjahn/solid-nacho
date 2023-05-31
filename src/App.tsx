@@ -1,24 +1,26 @@
-import { Component, For, createSignal, onMount } from "solid-js";
-import { createStore } from "solid-js/store";
-import { BASE_PATH, PostApi, PostResponseDTO, UserApi } from "./api";
-import PostComponent from "./posts/post";
+import { For, onMount } from "solid-js";
+import { Configuration, DefaultConfig } from "./api";
+import { MeProvider } from "./components/context/me";
+import { PostProvider } from "./components/context/post";
+import HeaderComponent from "./components/header";
+import PostsContainerComponent from "./components/postsContainer";
 
-const App: Component = () => {
-  const api = new PostApi();
-
-  const [posts, setPosts] = createStore<PostResponseDTO[]>([]);
-
+const TestComponent = () => {
   onMount(async () => {
-    setPosts(await api.postControllerGetPosts());
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken != null) {
+      DefaultConfig.config = new Configuration({ accessToken });
+    }
   });
 
   return (
-    <>
-      <div class="flex flex-col justify-center items-center">
-        <For each={posts}>{(post) => <PostComponent post={post} />}</For>
-      </div>
-    </>
+    <MeProvider>
+      <PostProvider initial={[]}>
+        <HeaderComponent />
+        <PostsContainerComponent />
+      </PostProvider>
+    </MeProvider>
   );
 };
 
-export default App;
+export default TestComponent;
